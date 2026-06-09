@@ -1,10 +1,13 @@
 {
 	"required": true,
-	"package": "com.yifei.mymod.mixin",
+	"package": "com.yifei.ncaa.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"GameModeCommandMixin",
+		"PlayerInteractionManagerMixin"
 	],
+	"client": [],
 	"injectors": {
 		"defaultRequire": 1
 	},

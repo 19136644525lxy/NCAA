@@ -1,32 +1,34 @@
 {
 	"schemaVersion": 1,
-	"id": "mymod",
+	"id": "ncaa",
 	"version": "${version}",
-	"name": "mymod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "NCAA",
+	"description": "此模组可以开关是否可以开创造",
 	"authors": [
-		"Me!"
+		"yifei"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://19136644525lxy.github.io/myweb/about.html"
 	},
-	"license": "CC BY-NC ND 4.0",
-	"icon": "assets/mymod/icon.png",
+	"license": "MIT",
+	"icon": "assets/ncaa/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.yifei.mymod.Mymod"
+			"com.yifei.ncaa.NCAA"
 		],
 		"fabric-datagen": [
-			"com.yifei.mymod.MymodDataGenerator"
+			"com.yifei.ncaa.NCAADataGenerator"
 		],
-        "client": [
-          "com.yifei.mymod.MymodClient"
-        ]
+		"client": [
+			"com.yifei.ncaa.NCAClient"
+		],
+		"modmenu": [
+			"com.yifei.ncaa.NCAClient"
+		]
 	},
 	"mixins": [
-		"mymod.mixins.json"
+		"ncaa.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.18.4",

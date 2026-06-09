@@ -1,12 +1,12 @@
-package com.yifei.mymod;
+package com.yifei.ncaa;
 
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Mymod implements ModInitializer {
-	public static final String MOD_ID = "mymod";
+public class NCAA implements ModInitializer {
+	public static final String MOD_ID = "ncaa";
 
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
@@ -19,6 +19,12 @@ public class Mymod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("Hello NCAA world!");
+		
+		// Initialize config
+		ConfigManager.init();
+		
+		// Register event listeners
+		PlayerEventHandler.registerEvents();
 	}
 }

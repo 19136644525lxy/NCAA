@@ -1,4 +1,4 @@
-package com.yifei.mymod.mixin;
+package com.yifei.ncaa.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;

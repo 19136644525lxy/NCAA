@@ -1,0 +1,9 @@
+{
+  "config.ncaa.title": "NCAA Configuration",
+  "config.ncaa.category.general": "General",
+  "config.ncaa.mod_enabled": "Mod Enabled",
+  "config.ncaa.mod_enabled.tooltip": "Enable or disable the mod",
+  "config.ncaa.message": "Message",
+  "config.ncaa.message.tooltip": "Message shown when player tries to switch to creative mode",
+  "config.ncaa.message.default": "You cannot switch to creative mode!"
+}
