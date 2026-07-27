@@ -46,6 +46,6 @@ public class ConfigManager {
 
     public static class Config {
         public boolean modEnabled = true;
-        public String message = "You cannot switch to creative mode!";
+        public String message = "";
     }
 }

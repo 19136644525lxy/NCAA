@@ -5,5 +5,5 @@
   "config.ncaa.mod_enabled.tooltip": "启用或禁用该模组",
   "config.ncaa.message": "提示消息",
   "config.ncaa.message.tooltip": "当玩家尝试切换到创造模式时显示的消息",
-  "config.ncaa.message.default": "你不能切换到创造模式！"
+  "config.ncaa.message.default": "旅行者，创造模式不可以开启哦，Ciallo(∠・ω< )⌒☆"
 }

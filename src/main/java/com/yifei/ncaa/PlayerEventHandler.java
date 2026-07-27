@@ -27,7 +27,10 @@ public class PlayerEventHandler {
     public static void forceSurvivalMode(ServerPlayerEntity player) {
         if (ConfigManager.config.modEnabled && player.interactionManager.getGameMode() != net.minecraft.world.GameMode.SURVIVAL) {
             player.changeGameMode(net.minecraft.world.GameMode.SURVIVAL);
-            player.sendMessage(net.minecraft.text.Text.literal(ConfigManager.config.message), false);
+            String message = ConfigManager.config.message.isEmpty() 
+                ? net.minecraft.text.Text.translatable("config.ncaa.message.default").getString() 
+                : ConfigManager.config.message;
+            player.sendMessage(net.minecraft.text.Text.literal(message), false);
         }
     }
     
