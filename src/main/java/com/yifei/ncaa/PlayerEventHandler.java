@@ -1,47 +1,55 @@
 package com.yifei.ncaa;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import mcmod.yfcorelib.api.Side;
+import mcmod.yfcorelib.api.YFCoreLib;
+import mcmod.yfcorelib.common.server.ServerAccess;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public class PlayerEventHandler {
-    public static void registerEvents() {
-        // Listen for player join server event
-        ServerPlayConnectionEvents.JOIN.register(PlayerEventHandler::onPlayerJoin);
-        
-        // Listen for server tick event
-        ServerTickEvents.END_SERVER_TICK.register(PlayerEventHandler::onServerTick);
-    }
-    
-    // Triggered when player joins server
-    private static void onPlayerJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
-        ServerPlayerEntity player = handler.getPlayer();
-        forceSurvivalMode(player);
-    }
-    
-    // Force set player to survival mode
-    public static void forceSurvivalMode(ServerPlayerEntity player) {
-        if (ConfigManager.config.modEnabled && player.interactionManager.getGameMode() != net.minecraft.world.GameMode.SURVIVAL) {
-            player.changeGameMode(net.minecraft.world.GameMode.SURVIVAL);
-            String message = ConfigManager.config.message.isEmpty() 
-                ? net.minecraft.text.Text.translatable("config.ncaa.message.default").getString() 
-                : ConfigManager.config.message;
-            player.sendMessage(net.minecraft.text.Text.literal(message), false);
-        }
-    }
-    
-    // Triggered every server tick
-    private static void onServerTick(MinecraftServer server) {
-        if (ConfigManager.config.modEnabled) {
-            // Check all players
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                // Force set to survival mode if not in survival mode
-                forceSurvivalMode(player);
-            }
-        }
-    }
+public final class PlayerEventHandler {
+	private PlayerEventHandler() {
+	}
+
+	public static void registerEvents() {
+		// 玩家进服：先判定一次，违规就给提示并开始倒计时
+		ServerPlayConnectionEvents.JOIN.register(PlayerEventHandler::onPlayerJoin);
+
+		// 兜底扫描：每 0.5 秒一次，处理不经 /gamemode 的路径（数据包、其他模组、/execute as 等）。
+		// 单个任务抛异常不会影响其他任务；服务端未运行时 ServerAccess.players() 返回空列表。
+		YFCoreLib.scheduler(Side.SERVER).repeat(10, PlayerEventHandler::sweepAll);
+	}
+
+	private static void onPlayerJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer joinedTo) {
+		check(handler.getPlayer());
+	}
+
+	/**
+	 * 违规就"先提示、后切回"。
+	 *
+	 * <p>真正的判定规则（受限模式 / 管理员豁免 / 旁观放行）都在 {@link GameModePolicy} 里，
+	 * 这里只负责驱动。</p>
+	 */
+	public static void check(ServerPlayerEntity player) {
+		if (!NcaaConfig.modEnabled()) {
+			return;
+		}
+		if (GameModePolicy.isRestricted(player)) {
+			GameModePolicy.warnThenForce(player);
+		}
+	}
+
+	private static void sweepAll() {
+		if (!NcaaConfig.modEnabled()) {
+			// 关掉模组时清空倒计时，避免重新开启后把之前的排队任务补刀到玩家头上
+			GameModePolicy.clearCountdowns();
+			return;
+		}
+		for (ServerPlayerEntity player : ServerAccess.players()) {
+			check(player);
+		}
+	}
 }
+

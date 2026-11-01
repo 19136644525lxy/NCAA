@@ -13,6 +13,9 @@
 	"license": "MIT",
 	"icon": "assets/ncaa/icon.png",
 	"environment": "*",
+	"mixins": [
+		"ncaa.mixins.json"
+	],
 	"entrypoints": {
 		"main": [
 			"com.yifei.ncaa.NCAA"
@@ -27,13 +30,11 @@
 			"com.yifei.ncaa.NCAClient"
 		]
 	},
-	"mixins": [
-		"ncaa.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=0.16.12",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"yfcorelib": ">=0.2.0"
 	}
 }

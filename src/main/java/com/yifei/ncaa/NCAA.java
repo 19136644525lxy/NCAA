@@ -1,6 +1,7 @@
 package com.yifei.ncaa;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,14 @@ public class NCAA implements ModInitializer {
 
 		LOGGER.info("Hello NCAA world!");
 		
-		// Initialize config
-		ConfigManager.init();
+		// 初始化配置：首次调用会创建并读盘，文件损坏/读失败会在这里直接暴露
+		NcaaConfig.manager();
 		
 		// Register event listeners
 		PlayerEventHandler.registerEvents();
+		
+		// /ncaa 命令：查 UUID、看名单、重载配置
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+				dispatcher.register(NcaaCommand.builder()));
 	}
 }

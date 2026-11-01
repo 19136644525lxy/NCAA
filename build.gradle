@@ -42,6 +42,13 @@ dependencies {
 	// Mod Menu and Cloth Config API for configuration UI
 	modImplementation "com.terraformersmc:modmenu:7.2.2"
 	modImplementation "me.shedaniel.cloth:cloth-config-fabric:11.1.136"
+
+	// YFCoreLib：仓库里 libs/ 自带一份生产 jar（intermediary），保证 clone 下来就能构建。
+	// 若按本仓布局存在最新构建产物（../../fabric/build/libs/），优先用它，方便本地联调。
+	// 必须用 modImplementation：Loom 才会把 intermediary 包重映射成 Yarn 视图；用 implementation 会编译期找不到类。
+	def yfcorelibBuilt = file("../../fabric/build/libs/yfcorelib-fabric-1.20.1-0.2.0.jar")
+	def yfcorelibJar = yfcorelibBuilt.exists() ? yfcorelibBuilt : file("libs/yfcorelib-fabric-1.20.1-0.2.0.jar")
+	modImplementation files(yfcorelibJar)
 	
 }
 
@@ -50,6 +57,16 @@ processResources {
 
 	filesMatching("fabric.mod.json") {
 		expand "version": inputs.properties.version
+	}
+}
+
+// Mixin 的 refmap：生产环境里 Mixin 必须靠 refmap 把 @Inject(method = "execute") 这类
+// Yarn 名字翻译成 intermediary 名字，否则注入目标找不到，required=true 会直接崩。
+// fabric-loom 1.14 默认不再跑旧版 Mixin 注解处理器，这里显式打开并指定 refmap 名。
+loom {
+	mixin {
+		useLegacyMixinAp = true
+		defaultRefmapName = "ncaa-refmap.json"
 	}
 }
 

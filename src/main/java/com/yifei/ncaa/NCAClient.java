@@ -21,26 +21,62 @@ public class NCAClient implements ClientModInitializer, ModMenuApi {
     }
 
     private Screen createConfigScreen(Screen parent) {
+        // 界面只读写内存里的 ConfigManager，点"保存"才落盘；值类型由 ConfigKey 保证
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("config.ncaa.title"))
-                .setSavingRunnable(ConfigManager::saveConfig);
+                .setSavingRunnable(() -> {
+                    try {
+                        NcaaConfig.save();
+                    } catch (RuntimeException e) {
+                        // 配置加载失败时 save 会拒绝写回（避免覆盖用户文件），界面不能因此崩掉
+                        NCAA.LOGGER.error("保存 ncaa 配置失败", e);
+                    }
+                });
 
         ConfigCategory general = builder.getOrCreateCategory(Text.translatable("config.ncaa.category.general"));
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         general.addEntry(entryBuilder
-                .startBooleanToggle(Text.translatable("config.ncaa.mod_enabled"), ConfigManager.config.modEnabled)
+                .startBooleanToggle(Text.translatable("config.ncaa.mod_enabled"), NcaaConfig.modEnabled())
                 .setDefaultValue(true)
                 .setTooltip(Text.translatable("config.ncaa.mod_enabled.tooltip"))
-                .setSaveConsumer(newValue -> ConfigManager.config.modEnabled = newValue)
+                .setSaveConsumer(NcaaConfig::setModEnabled)
                 .build());
 
         general.addEntry(entryBuilder
-                .startStrField(Text.translatable("config.ncaa.message"), ConfigManager.config.message)
+                .startStrField(Text.translatable("config.ncaa.message"), NcaaConfig.message())
                 .setDefaultValue(Text.translatable("config.ncaa.message.default").getString())
                 .setTooltip(Text.translatable("config.ncaa.message.tooltip"))
-                .setSaveConsumer(newValue -> ConfigManager.config.message = newValue)
+                .setSaveConsumer(NcaaConfig::setMessage)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startBooleanToggle(Text.translatable("config.ncaa.exempt_operators"), NcaaConfig.exemptOperators())
+                .setDefaultValue(true)
+                .setTooltip(Text.translatable("config.ncaa.exempt_operators.tooltip"))
+                .setSaveConsumer(NcaaConfig::setExemptOperators)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startIntSlider(Text.translatable("config.ncaa.grace_seconds"), NcaaConfig.graceSeconds(), 1, 10)
+                .setDefaultValue(2)
+                .setTooltip(Text.translatable("config.ncaa.grace_seconds.tooltip"))
+                .setSaveConsumer(NcaaConfig::setGraceSeconds)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startStrField(Text.translatable("config.ncaa.admin_whitelist"), NcaaConfig.adminWhitelist())
+                .setDefaultValue("")
+                .setTooltip(Text.translatable("config.ncaa.admin_whitelist.tooltip"))
+                .setSaveConsumer(NcaaConfig::setAdminWhitelist)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startStrField(Text.translatable("config.ncaa.admin_blacklist"), NcaaConfig.adminBlacklist())
+                .setDefaultValue("")
+                .setTooltip(Text.translatable("config.ncaa.admin_blacklist.tooltip"))
+                .setSaveConsumer(NcaaConfig::setAdminBlacklist)
                 .build());
 
         return builder.build();
