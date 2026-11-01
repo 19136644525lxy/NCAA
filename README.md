@@ -74,7 +74,21 @@ A Fabric mod for Minecraft that forces players into survival mode and prevents s
   例如 `"yifei, Helper1, 3f0a9c1e-9b0d-4c1a-8f2b-6d5e7a8b9c0d"`。
 - 用 UUID 更稳（改名不影响）；用名字更方便，改名后记得同步改名单。
 - 被黑名单拦下时提示会说明"其他权限照旧，只是不能切模式"，避免管理员误以为被封了。
-- 名单改动后需要重载配置（Mod Menu 里点保存，或重进世界）才生效。
+- 名单改动后可用 `/ncaa reload` 立刻生效（手改文件时），或在 Mod Menu 里点保存。
+
+## 命令
+
+需要权限等级 ≥ 2（管理员）：
+
+| 命令 | 作用 |
+| --- | --- |
+| `/ncaa uuid` | 查看自己的 UUID 与名单状态 |
+| `/ncaa uuid <玩家名>` | 查看指定玩家，**离线玩家也能查**（走玩家缓存） |
+| `/ncaa list` | 查看当前白名单与黑名单 |
+| `/ncaa reload` | 手改 `config/ncaa.json` 后重新加载 |
+
+UUID 在聊天栏里是**青蓝色带下划线的可点击文本，点一下就复制到剪贴板**——填名单时直接粘贴，
+不用手抄那 36 位十六进制。
 
 ## Building
 

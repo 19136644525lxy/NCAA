@@ -42,12 +42,12 @@ public final class GameModePolicy {
 
 	/** 白名单：名单内玩家完全豁免 */
 	public static boolean isWhitelisted(ServerPlayerEntity player) {
-		return inList(NcaaConfig.adminWhitelist(), player);
+		return inList(NcaaConfig.adminWhitelist(), player.getGameProfile().getName(), player.getUuid());
 	}
 
 	/** 黑名单：名单内玩家保留其他权限，但禁止切换游戏模式 */
 	public static boolean isBlacklisted(ServerPlayerEntity player) {
-		return inList(NcaaConfig.adminBlacklist(), player);
+		return inList(NcaaConfig.adminBlacklist(), player.getGameProfile().getName(), player.getUuid());
 	}
 
 	/**
@@ -125,21 +125,39 @@ public final class GameModePolicy {
 		COUNTING_DOWN.clear();
 	}
 
-	/** 名单匹配：玩家名（忽略大小写）或 UUID 字符串 */
-	private static boolean inList(String rawList, ServerPlayerEntity player) {
+	/**
+	 * 名单匹配：玩家名（忽略大小写）或 UUID 字符串。
+	 *
+	 * <p>两个身份参数都可为 null（离线玩家可能只有其中之一），为 null 的那一项不参与比较。
+	 * 命令层要查一个不在线的玩家时也走这里。</p>
+	 */
+	public static boolean inList(String rawList, String playerName, UUID playerId) {
 		if (rawList == null || rawList.isBlank()) {
 			return false;
 		}
-		String name = player.getGameProfile().getName();
-		String uuid = player.getUuid().toString();
+		String uuid = playerId == null ? null : playerId.toString();
 		for (String entry : rawList.split("[,;\\s]+")) {
 			if (entry.isBlank()) {
 				continue;
 			}
-			if (entry.equalsIgnoreCase(name) || entry.equalsIgnoreCase(uuid)) {
+			if (playerName != null && entry.equalsIgnoreCase(playerName)) {
+				return true;
+			}
+			if (uuid != null && entry.equalsIgnoreCase(uuid)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/** 名单里的一条记录是否命中了给定玩家（命令输出用） */
+	public static String listStatus(String playerName, UUID playerId) {
+		if (inList(NcaaConfig.adminBlacklist(), playerName, playerId)) {
+			return "blacklist";
+		}
+		if (inList(NcaaConfig.adminWhitelist(), playerName, playerId)) {
+			return "whitelist";
+		}
+		return "none";
 	}
 }
