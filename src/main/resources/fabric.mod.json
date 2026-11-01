@@ -32,6 +32,6 @@
 		"minecraft": "~1.20.1",
 		"java": ">=17",
 		"fabric-api": "*",
-		"yfcorelib": ">=0.1.0"
+		"yfcorelib": ">=0.2.0"
 	}
 }

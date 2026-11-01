@@ -2,7 +2,7 @@ package com.yifei.ncaa;
 
 import mcmod.yfcorelib.api.Side;
 import mcmod.yfcorelib.api.YFCoreLib;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import mcmod.yfcorelib.common.server.ServerAccess;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
@@ -12,16 +12,10 @@ import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 
 public final class PlayerEventHandler {
-	/** 当前运行中的服务端；由生命周期事件维护，没有服务端时为 null */
-	private static volatile MinecraftServer server;
-
 	private PlayerEventHandler() {
 	}
 
 	public static void registerEvents() {
-		ServerLifecycleEvents.SERVER_STARTING.register(started -> server = started);
-		ServerLifecycleEvents.SERVER_STOPPED.register(stopped -> server = null);
-
 		// 玩家进服：立刻校正一次，不用等到下一次扫
 		ServerPlayConnectionEvents.JOIN.register(PlayerEventHandler::onPlayerJoin);
 
@@ -49,13 +43,15 @@ public final class PlayerEventHandler {
 		player.sendMessage(Text.literal(message), false);
 	}
 
-	/** 每秒一次的全量校正 */
+	/**
+	 * 每秒一次的全量校正。
+	 *
+	 * <p>在线玩家列表由 YFCoreLib 的 {@link ServerAccess} 提供——不需要自己订阅
+	 * SERVER_STARTING / SERVER_STOPPED 维护 MinecraftServer 引用，也不用手写"服务端还没起来"的判断：
+	 * 服务端未运行时它直接返回空列表。</p>
+	 */
 	private static void sweepAll() {
-		MinecraftServer current = server;
-		if (current == null || !NcaaConfig.modEnabled()) {
-			return;
-		}
-		for (ServerPlayerEntity player : current.getPlayerManager().getPlayerList()) {
+		for (ServerPlayerEntity player : ServerAccess.players()) {
 			forceSurvivalMode(player);
 		}
 	}

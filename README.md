@@ -3,6 +3,7 @@
 A Fabric mod for Minecraft that forces players into survival mode and prevents switching to creative mode.
 
 > **本分支（`yfapi`）改动**：配置内核、刻调度改为依赖 [YFCoreLib](https://github.com/19136644525lxy/YFCorelib)，
+> 在线玩家遍历改用库的 `ServerAccess`（不再自己订阅服务端生命周期事件），
 > 并清理了模板遗留的空壳 Mixin。行为与 0.1.x 一致，安装时**必须同时装 YFCoreLib**。
 
 ## Features
@@ -18,7 +19,7 @@ A Fabric mod for Minecraft that forces players into survival mode and prevents s
 - Minecraft 1.20.1
 - Fabric Loader >= 0.16.12
 - Fabric API
-- **YFCoreLib >= 0.1.0**（本分支起必需）
+- **YFCoreLib >= 0.2.0**（本分支起必需）
 - Mod Menu (for configuration UI)
 - Cloth Config API (for configuration UI)
 
