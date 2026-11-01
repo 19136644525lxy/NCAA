@@ -5,12 +5,21 @@ A Fabric mod for Minecraft that forces players into survival mode and prevents s
 > **本分支（`yfapi`）改动**：配置内核、刻调度改为依赖 [YFCoreLib](https://github.com/19136644525lxy/YFCorelib)，
 > 在线玩家遍历改用库的 `ServerAccess`（不再自己订阅服务端生命周期事件），
 > 并清理了模板遗留的空壳 Mixin。行为与 0.1.x 一致，安装时**必须同时装 YFCoreLib**。
+>
+> **0.2.0 起的行为调整**：
+> - **旁观模式放行**——只限制创造与冒险，旁观不再被拽回生存；
+> - **管理员豁免**（权限等级 ≥ 2，默认开启，可在配置里关掉）；
+> - **先提示、后切回**：检测到违规先在动作栏提示，`graceSeconds` 秒后才切回，不再瞬间拽人；
+> - **从源头拦截**：新加 Mixin 拦 `GameModeCommand`，受限玩家执行 `/gamemode creative|adventure` 直接报错，
+>   根本进不去创造（不再"先给你创造，下一秒再抢回来"）。
 
 ## Features
 
 - Forces players to survival mode upon entering the world
-- Blocks all creative mode switches via commands, F3+F4 shortcuts, etc.
-- Shows customizable warning message when players attempt to switch modes
+- Blocks creative/adventure mode switches **at the command level** (Mixin on `GameModeCommand`) 
+- Spectator mode is explicitly allowed
+- Operators (permission level ≥ 2) can be exempted
+- Shows a warning first, then switches back after a configurable grace period
 - Configuration file generated in `.minecraft/config/ncaa.json`
 - Mod Menu integration with dedicated configuration interface
 
@@ -31,13 +40,19 @@ A Fabric mod for Minecraft that forces players into survival mode and prevents s
 {
   "modEnabled": true,
   "message": "",
+  "exemptOperators": true,
+  "graceSeconds": 2,
   "__version": 1
 }
 ```
 
 - `modEnabled`：是否启用强制生存模式
 - `message`：被拉回生存时发给玩家的提示，留空使用语言文件里的默认文案
+- `exemptOperators`：管理员（权限等级 ≥ 2）是否不受限制，默认 `true`
+- `graceSeconds`：检测到违规后先提示多少秒再切回，默认 `2`（可在界面里 1–10 秒调整）
 - `__version`：由 YFCoreLib 维护的格式版本号，用于将来做配置迁移，不要手改
+
+> 新增的两个键由 YFCoreLib 自动补默认值，老配置文件不需要手改。
 
 ## Building
 

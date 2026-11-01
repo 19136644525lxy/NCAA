@@ -22,9 +22,23 @@ public final class NcaaConfig {
 	public static final ConfigKey<String> MESSAGE =
 			ConfigKey.of("message", String.class, "", "被拉回生存时的提示文字，留空用默认文案");
 
+	/** 管理员（权限等级 ≥ 2）是否豁免限制 */
+	public static final ConfigKey<Boolean> EXEMPT_OPERATORS =
+			ConfigKey.of("exemptOperators", Boolean.class, true, "管理员是否不受本模组限制");
+
+	/** 提示之后隔多少秒才强制切回生存，给玩家反应时间 */
+	public static final ConfigKey<Integer> GRACE_SECONDS =
+			ConfigKey.of("graceSeconds", Integer.class, 2, "提示后多少秒强制切回生存");
+
+	/**
+	 * 配置版本仍是 1：这次只是<strong>新增</strong>两个键，缺键由内核的 mergeDefaults 补默认值，
+	 * 老配置文件不需要搬运——按本库的约定，只有要改写已有键的值时才需要抬版本号 + 写迁移器。
+	 */
 	public static final ConfigSpec SPEC = ConfigBuilder.create("ncaa")
 			.define(MOD_ENABLED)
 			.define(MESSAGE)
+			.define(EXEMPT_OPERATORS)
+			.define(GRACE_SECONDS)
 			.version(1)
 			.build();
 
@@ -55,6 +69,22 @@ public final class NcaaConfig {
 
 	public static void setMessage(String value) {
 		manager().set(MESSAGE, value == null ? "" : value);
+	}
+
+	public static boolean exemptOperators() {
+		return manager().get(EXEMPT_OPERATORS);
+	}
+
+	public static int graceSeconds() {
+		return manager().get(GRACE_SECONDS);
+	}
+
+	public static void setExemptOperators(boolean value) {
+		manager().set(EXEMPT_OPERATORS, value);
+	}
+
+	public static void setGraceSeconds(int value) {
+		manager().set(GRACE_SECONDS, Math.max(1, Math.min(10, value)));
 	}
 
 	/** 把内存里的值写回文件（Cloth Config 的"保存"按钮用） */

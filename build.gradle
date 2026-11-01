@@ -60,6 +60,16 @@ processResources {
 	}
 }
 
+// Mixin 的 refmap：生产环境里 Mixin 必须靠 refmap 把 @Inject(method = "execute") 这类
+// Yarn 名字翻译成 intermediary 名字，否则注入目标找不到，required=true 会直接崩。
+// fabric-loom 1.14 默认不再跑旧版 Mixin 注解处理器，这里显式打开并指定 refmap 名。
+loom {
+	mixin {
+		useLegacyMixinAp = true
+		defaultRefmapName = "ncaa-refmap.json"
+	}
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }

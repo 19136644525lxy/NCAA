@@ -51,6 +51,20 @@ public class NCAClient implements ClientModInitializer, ModMenuApi {
                 .setSaveConsumer(NcaaConfig::setMessage)
                 .build());
 
+        general.addEntry(entryBuilder
+                .startBooleanToggle(Text.translatable("config.ncaa.exempt_operators"), NcaaConfig.exemptOperators())
+                .setDefaultValue(true)
+                .setTooltip(Text.translatable("config.ncaa.exempt_operators.tooltip"))
+                .setSaveConsumer(NcaaConfig::setExemptOperators)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startIntSlider(Text.translatable("config.ncaa.grace_seconds"), NcaaConfig.graceSeconds(), 1, 10)
+                .setDefaultValue(2)
+                .setTooltip(Text.translatable("config.ncaa.grace_seconds.tooltip"))
+                .setSaveConsumer(NcaaConfig::setGraceSeconds)
+                .build());
+
         return builder.build();
     }
 }

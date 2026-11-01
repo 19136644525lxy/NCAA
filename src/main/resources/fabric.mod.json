@@ -13,6 +13,9 @@
 	"license": "MIT",
 	"icon": "assets/ncaa/icon.png",
 	"environment": "*",
+	"mixins": [
+		"ncaa.mixins.json"
+	],
 	"entrypoints": {
 		"main": [
 			"com.yifei.ncaa.NCAA"

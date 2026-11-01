@@ -5,5 +5,11 @@
   "config.ncaa.mod_enabled.tooltip": "启用或禁用该模组",
   "config.ncaa.message": "提示消息",
   "config.ncaa.message.tooltip": "当玩家尝试切换到创造模式时显示的消息",
-  "config.ncaa.message.default": "旅行者，创造模式不可以开启哦，Ciallo(∠・ω< )⌒☆"
+  "config.ncaa.message.default": "旅行者，创造模式不可以开启哦，Ciallo(∠・ω< )⌒☆",
+  "config.ncaa.exempt_operators": "管理员豁免",
+  "config.ncaa.exempt_operators.tooltip": "启用后，权限等级 ≥ 2 的玩家不受本模组限制（方便服主/管理员）",
+  "config.ncaa.grace_seconds": "切回前的提示时间（秒）",
+  "config.ncaa.grace_seconds.tooltip": "检测到违规后先在动作栏提示，等这么多秒再切回生存，避免瞬间被拽回去",
+  "ncaa.warn.grace": "非生存模式受限：%s 秒后自动切回生存（旁观模式不受限制）",
+  "ncaa.error.gamemode_blocked": "非管理员不能切换到创造/冒险模式（旁观模式不受限制）"
 }
