@@ -21,8 +21,8 @@ public class NCAA implements ModInitializer {
 
 		LOGGER.info("Hello NCAA world!");
 		
-		// Initialize config
-		ConfigManager.init();
+		// 初始化配置：首次调用会创建并读盘，文件损坏/读失败会在这里直接暴露
+		NcaaConfig.manager();
 		
 		// Register event listeners
 		PlayerEventHandler.registerEvents();
