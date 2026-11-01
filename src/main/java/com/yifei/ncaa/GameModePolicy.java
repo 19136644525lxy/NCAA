@@ -14,12 +14,19 @@ import net.minecraft.world.GameMode;
 /**
  * 「哪些游戏模式算违规、谁豁免、怎么切回去」的判定与执行，集中在这里。
  *
- * <p>规则（可由配置调整）：</p>
- * <ul>
- *   <li>受限模式：创造、冒险。生存与<strong>旁观放行</strong>——旁观常用于观察红石/建筑，不该被拽回来。</li>
- *   <li>管理员豁免：权限等级 ≥ 2 的玩家不受限制（默认开启，可在配置里关掉）。</li>
- *   <li>切回前先提示，等 {@code graceSeconds} 秒再切，不在玩家毫无准备时瞬间拽回去。</li>
- * </ul>
+ * <p>判定顺序（先命中先返回）：</p>
+ * <ol>
+ *   <li><strong>黑名单</strong>（{@code adminBlacklist}）：只限制"切换游戏模式"这一件事，
+ *       其余权限全部照旧；<strong>黑名单优先于白名单</strong>，同时出现在两个名单里按黑名单处理；</li>
+ *   <li><strong>白名单</strong>（{@code adminWhitelist}）：不受任何限制，随便切模式；</li>
+ *   <li><strong>未列入任何名单的管理员</strong>：由 {@code exemptOperators} 决定，默认豁免；</li>
+ *   <li><strong>普通玩家</strong>：一律限制，只能待在生存/旁观。</li>
+ * </ol>
+ *
+ * <p>名单里一条记录可以写玩家名（不区分大小写），也可以写 UUID 字符串；
+ * 多条之间用英文逗号、分号、空格或换行分隔。</p>
+ *
+ * <p>"受限"指创造与冒险两种模式；生存与<strong>旁观</strong>放行——旁观常用于观察，不该被拽回来。</p>
  */
 public final class GameModePolicy {
 	/** 已经在倒计时中的玩家，避免每轮扫描重复排任务、重复提示 */
@@ -33,12 +40,34 @@ public final class GameModePolicy {
 		return mode == GameMode.CREATIVE || mode == GameMode.ADVENTURE;
 	}
 
-	/** 管理员豁免：权限等级 ≥ 2（OP）且配置里开着豁免 */
+	/** 白名单：名单内玩家完全豁免 */
+	public static boolean isWhitelisted(ServerPlayerEntity player) {
+		return inList(NcaaConfig.adminWhitelist(), player);
+	}
+
+	/** 黑名单：名单内玩家保留其他权限，但禁止切换游戏模式 */
+	public static boolean isBlacklisted(ServerPlayerEntity player) {
+		return inList(NcaaConfig.adminBlacklist(), player);
+	}
+
+	/**
+	 * 是否豁免"切换游戏模式"这条限制。
+	 *
+	 * <p>黑名单 &gt; 白名单 &gt; {@code exemptOperators}（仅对管理员生效）。
+	 * 普通玩家即使不在黑名单里也一样受限——此时返回 false 是因为他本来就不是管理员，
+	 * 而不是因为他被针对了。</p>
+	 */
 	public static boolean isExempt(ServerPlayerEntity player) {
+		if (isBlacklisted(player)) {
+			return false;
+		}
+		if (isWhitelisted(player)) {
+			return true;
+		}
 		return NcaaConfig.exemptOperators() && player.hasPermissionLevel(2);
 	}
 
-	/** 该玩家此刻是否处于需要被处理的违规状态 */
+	/** 该玩家此刻是否处于需要被处理的状态 */
 	public static boolean isRestricted(ServerPlayerEntity player) {
 		if (!NcaaConfig.modEnabled()) {
 			return false;
@@ -49,11 +78,16 @@ public final class GameModePolicy {
 		return !isExempt(player);
 	}
 
+	/** 被拦下时给对方的原因。黑名单要说得更清楚——"你只是不能切模式，别的权限没少" */
+	public static Text blockReason(ServerPlayerEntity player) {
+		return Text.translatable(isBlacklisted(player) ? "ncaa.error.blacklisted" : "ncaa.error.gamemode_blocked");
+	}
+
 	/**
 	 * 先提示、再延时切回。
 	 *
 	 * <p>同一个玩家在倒计时期间重复调用会被忽略；倒计时结束时重新判定一次——期间玩家自己切回生存、
-	 * 或者变成了管理员，就不再处理。</p>
+	 * 或者被加进了白名单，就不再处理。</p>
 	 */
 	public static void warnThenForce(ServerPlayerEntity player) {
 		if (!COUNTING_DOWN.add(player.getUuid())) {
@@ -89,5 +123,23 @@ public final class GameModePolicy {
 	/** 关掉模组时清空倒计时，避免重新开启后把之前的排队任务补刀到玩家头上 */
 	public static void clearCountdowns() {
 		COUNTING_DOWN.clear();
+	}
+
+	/** 名单匹配：玩家名（忽略大小写）或 UUID 字符串 */
+	private static boolean inList(String rawList, ServerPlayerEntity player) {
+		if (rawList == null || rawList.isBlank()) {
+			return false;
+		}
+		String name = player.getGameProfile().getName();
+		String uuid = player.getUuid().toString();
+		for (String entry : rawList.split("[,;\\s]+")) {
+			if (entry.isBlank()) {
+				continue;
+			}
+			if (entry.equalsIgnoreCase(name) || entry.equalsIgnoreCase(uuid)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

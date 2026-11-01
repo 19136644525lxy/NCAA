@@ -24,11 +24,19 @@ public final class NcaaConfig {
 
 	/** 管理员（权限等级 ≥ 2）是否豁免限制 */
 	public static final ConfigKey<Boolean> EXEMPT_OPERATORS =
-			ConfigKey.of("exemptOperators", Boolean.class, true, "管理员是否不受本模组限制");
+			ConfigKey.of("exemptOperators", Boolean.class, true, "未列入任何名单的管理员是否不受本模组限制");
 
 	/** 提示之后隔多少秒才强制切回生存，给玩家反应时间 */
 	public static final ConfigKey<Integer> GRACE_SECONDS =
 			ConfigKey.of("graceSeconds", Integer.class, 2, "提示后多少秒强制切回生存");
+
+	/** 白名单：名单内玩家可使用所有游戏模式（不受本模组限制） */
+	public static final ConfigKey<String> ADMIN_WHITELIST = ConfigKey.of("adminWhitelist", String.class, "",
+			"管理员白名单：名单内玩家可使用所有游戏模式；逗号/空格/换行分隔，可填玩家名或 UUID");
+
+	/** 黑名单：名单内玩家保留其他权限，但不能切换游戏模式 */
+	public static final ConfigKey<String> ADMIN_BLACKLIST = ConfigKey.of("adminBlacklist", String.class, "",
+			"管理员黑名单：名单内玩家保留其他权限，但不能切换游戏模式；黑名单优先于白名单");
 
 	/**
 	 * 配置版本仍是 1：这次只是<strong>新增</strong>两个键，缺键由内核的 mergeDefaults 补默认值，
@@ -39,6 +47,8 @@ public final class NcaaConfig {
 			.define(MESSAGE)
 			.define(EXEMPT_OPERATORS)
 			.define(GRACE_SECONDS)
+			.define(ADMIN_WHITELIST)
+			.define(ADMIN_BLACKLIST)
 			.version(1)
 			.build();
 
@@ -85,6 +95,22 @@ public final class NcaaConfig {
 
 	public static void setGraceSeconds(int value) {
 		manager().set(GRACE_SECONDS, Math.max(1, Math.min(10, value)));
+	}
+
+	public static String adminWhitelist() {
+		return manager().get(ADMIN_WHITELIST);
+	}
+
+	public static String adminBlacklist() {
+		return manager().get(ADMIN_BLACKLIST);
+	}
+
+	public static void setAdminWhitelist(String value) {
+		manager().set(ADMIN_WHITELIST, value == null ? "" : value);
+	}
+
+	public static void setAdminBlacklist(String value) {
+		manager().set(ADMIN_BLACKLIST, value == null ? "" : value);
 	}
 
 	/** 把内存里的值写回文件（Cloth Config 的"保存"按钮用） */

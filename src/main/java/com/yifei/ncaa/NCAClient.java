@@ -65,6 +65,20 @@ public class NCAClient implements ClientModInitializer, ModMenuApi {
                 .setSaveConsumer(NcaaConfig::setGraceSeconds)
                 .build());
 
+        general.addEntry(entryBuilder
+                .startStrField(Text.translatable("config.ncaa.admin_whitelist"), NcaaConfig.adminWhitelist())
+                .setDefaultValue("")
+                .setTooltip(Text.translatable("config.ncaa.admin_whitelist.tooltip"))
+                .setSaveConsumer(NcaaConfig::setAdminWhitelist)
+                .build());
+
+        general.addEntry(entryBuilder
+                .startStrField(Text.translatable("config.ncaa.admin_blacklist"), NcaaConfig.adminBlacklist())
+                .setDefaultValue("")
+                .setTooltip(Text.translatable("config.ncaa.admin_blacklist.tooltip"))
+                .setSaveConsumer(NcaaConfig::setAdminBlacklist)
+                .build());
+
         return builder.build();
     }
 }

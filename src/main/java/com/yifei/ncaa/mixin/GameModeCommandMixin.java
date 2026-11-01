@@ -10,7 +10,6 @@ import com.yifei.ncaa.NcaaConfig;
 import net.minecraft.server.command.GameModeCommand;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,18 +43,18 @@ public abstract class GameModeCommandMixin {
 		if (!NcaaConfig.modEnabled() || !GameModePolicy.isBlockedMode(gameMode)) {
 			return;
 		}
-		boolean blocked = false;
+		ServerPlayerEntity blockedTarget = null;
 		for (ServerPlayerEntity target : targets) {
 			if (!GameModePolicy.isExempt(target)) {
-				blocked = true;
+				blockedTarget = target;
 				break;
 			}
 		}
-		if (!blocked) {
+		if (blockedTarget == null) {
 			return;
 		}
 		NCAA.LOGGER.debug("拦截 /gamemode {}（目标 {} 名玩家，至少一名不受限）", gameMode.getName(), targets.size());
-		context.getSource().sendError(Text.translatable("ncaa.error.gamemode_blocked"));
+		context.getSource().sendError(GameModePolicy.blockReason(blockedTarget));
 		cir.setReturnValue(0);
 	}
 }
